@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { helsinki } from "./bot/helsinki.js";
 import cors from "cors"
+import { callAgent } from "bot/agent.js";
 const app = express();
 app.use(express.json());
 
@@ -59,6 +60,26 @@ app.post("/test", async (req: any, res: any) => {
 
   console.log({ groupId, newMessage })
   res.json({ response: "Helsinki bot received message" });
+});
+
+
+app.post("/test-agent", async (req: any, res: any) => {
+  const { groupId, newMessage } = req.body;
+
+  // Validate input
+  if (!groupId || !newMessage?.username || !newMessage?.text) {
+    return res.status(400).json({
+      error: "Missing required fields: groupId, newMessage.username, newMessage.text"
+    });
+  }
+
+  const response = await callAgent({
+    message: newMessage.text,
+    username: newMessage.username,
+    groupId: groupId
+  })
+
+  return res.json({ response });
 });
 
 // Start server

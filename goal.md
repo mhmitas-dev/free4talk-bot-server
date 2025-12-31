@@ -1,0 +1,5 @@
+- The ai should have a efficient memory.
+- the bot should be smart,
+    - it should not mess the chatbox
+    - it should have ability to decide whether to reply or not
+    - proper reply handling, not too fast, process multiple message.
