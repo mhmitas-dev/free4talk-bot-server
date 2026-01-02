@@ -1,14 +1,15 @@
-import { ChatGroq } from "@langchain/groq";
 import "dotenv/config";
 import { createAgent, HumanMessage } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
 import { system_prompt_for_agent } from "./prompts.js";
+import { ChatCerebras } from "@langchain/cerebras";
 
-const llm = new ChatGroq({
-    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+const llm = new ChatCerebras({
+    model: "llama-3.3-70b",
     temperature: 0.5,
-    apiKey: process.env.GROQ_API_KEY
-});
+    maxTokens: 100,
+    maxRetries: 2,
+})
 
 const checkpointer = new MemorySaver()
 const agent = createAgent({
@@ -24,6 +25,7 @@ export async function callAgent({ message, username, groupId }: { message: strin
     }
 
     const humanMsg = new HumanMessage({
+        // content: `${username.toUpperCase()}: ${message}`,
         content: message,
         name: username,
     });
@@ -35,6 +37,6 @@ export async function callAgent({ message, username, groupId }: { message: strin
             thread_id: groupId
         }
     });
-
+    console.log(result?.messages?.at(-1)?.content)
     return result?.messages?.at(-1)?.content || "Couldn't find anything to send!"
 }

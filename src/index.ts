@@ -3,14 +3,20 @@ import express from "express";
 import { helsinki } from "./bot/helsinki.js";
 import cors from "cors"
 import { callAgent } from "bot/agent.js";
+import { rateLimit } from 'express-rate-limit';
+
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = ['chrome-extension://iocmdpdgbmhgebahciahcpkhdofjdlkf', 'http://localhost:3000'];
+const allowedOrigins = [
+  'chrome-extension://iocmdpdgbmhgebahciahcpkhdofjdlkf',
+  'http://localhost:3000',
+  "https://www.free4talk.com"
+];
+
 app.use(cors({
-  origin: function (origin: any, callback: any) {
-    // Allow requests with no origin (like mobile apps or curl requests) or from the allowed list
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -48,22 +54,17 @@ app.post("/chat", async (req: any, res: any) => {
   }
 });
 
-app.post("/test", async (req: any, res: any) => {
-  const { groupId, newMessage } = req.body;
 
-  // Validate input
-  if (!groupId || !newMessage?.username || !newMessage?.text) {
-    return res.status(400).json({
-      error: "Missing required fields: groupId, newMessage.username, newMessage.text"
-    });
-  }
-
-  console.log({ groupId, newMessage })
-  res.json({ response: "Helsinki bot received message" });
+const callAgentLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute in milliseconds
+  limit: 30,           // Maximum of 40 requests per window
+  message: 'Too many requests to this agent. Please try again after a minute.',
+  standardHeaders: 'draft-8', // Returns rate limit info in the `RateLimit` header
+  legacyHeaders: false,       // Disables the `X-RateLimit-*` headers
 });
 
 
-app.post("/test-agent", async (req: any, res: any) => {
+app.post("/test-agent", callAgentLimiter, async (req: any, res: any) => {
   const { groupId, newMessage } = req.body;
 
   // Validate input

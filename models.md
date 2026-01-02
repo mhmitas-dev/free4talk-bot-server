@@ -1,31 +1,12 @@
-NVIDIA:
-- meta/llama3-70b-instruct
-- moonshotai/kimi-k2-thinking
-
-
+# NVIDIA
 ```ts
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: '$NVIDIA_API_KEY',
-  baseURL: 'https://integrate.api.nvidia.com/v1',
-})
-
-async function main() {
-  const completion = await openai.chat.completions.create({
-    model: "meta/llama3-70b-instruct",
-    messages: [{"role":"user","content":""}],
-    temperature: 0.5,
-    top_p: 1,
-    max_tokens: 1024,
-    stream: true,
-  })
-   
-  for await (const chunk of completion) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || '')
-  }
-  
-}
-
-main();
+const llm = new ChatOpenAI({
+    modelName: "deepseek-ai/deepseek-v3.1-terminus",
+    configuration: {
+        baseURL: "https://integrate.api.nvidia.com/v1",
+        apiKey: process.env.NVIDIA_API_KEY
+    }
+});
 ```
+### Models
+- deepseek-ai/deepseek-v3.1-terminus
