@@ -22,7 +22,7 @@ const summarizationModel = new ChatOpenAI({
 
 const checkpointer = new MemorySaver()
 const agent = createAgent({
-    model: llm,
+    model: summarizationModel,
     systemPrompt: system_prompt_for_agent,
     checkpointer,
     middleware: [
@@ -39,12 +39,6 @@ export async function callAgent({ message, username, groupId }: { message: strin
     if (!message || !username || !groupId) {
         return "??? Missing required fields: message, username, groupId";
     }
-
-    // const humanMsg = new HumanMessage({
-    //     // content: `${username.toUpperCase()}: ${message}`,
-    //     content: message,
-    //     name: username,
-    // });
 
     const formattedMessage = `Name: ${username} \nMessage: ${message}`
 

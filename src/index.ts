@@ -10,7 +10,6 @@ const corsOptions: CorsOptions = {
   // Allow only your frontend's domain
   origin: [
     'chrome-extension://iocmdpdgbmhgebahciahcpkhdofjdlkf',
-    'http://localhost:3000',
     "https://www.free4talk.com"
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
