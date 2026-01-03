@@ -10,3 +10,4 @@ const llm = new ChatOpenAI({
 ```
 ### Models
 - deepseek-ai/deepseek-v3.1-terminus
+- vidia/nemotron-3-nano-30b-a3b

@@ -57,7 +57,7 @@ app.post("/chat", async (req: any, res: any) => {
 
 const callAgentLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute in milliseconds
-  limit: 30,           // Maximum of 40 requests per window
+  limit: 20,           // Maximum of 40 requests per window
   message: 'Too many requests to this agent. Please try again after a minute.',
   standardHeaders: 'draft-8', // Returns rate limit info in the `RateLimit` header
   legacyHeaders: false,       // Disables the `X-RateLimit-*` headers
