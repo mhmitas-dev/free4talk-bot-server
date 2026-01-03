@@ -1,59 +1,26 @@
-import "dotenv/config";
-import express from "express";
-import { helsinki } from "./bot/helsinki.js";
-import cors from "cors"
-import { callAgent } from "bot/agent.js";
-import { rateLimit } from 'express-rate-limit';
+import express, { type Request, type Response } from 'express';
+import 'dotenv/config';
+import cors, { type CorsOptions } from 'cors';
+import rateLimit from 'express-rate-limit';
+import { callAgent } from './bot/agent.js';
 
 const app = express();
+
+const corsOptions: CorsOptions = {
+  // Allow only your frontend's domain
+  origin: [
+    'chrome-extension://iocmdpdgbmhgebahciahcpkhdofjdlkf',
+    'http://localhost:3000',
+    "https://www.free4talk.com"
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Required if sending cookies or auth headers
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-
-const allowedOrigins = [
-  'chrome-extension://iocmdpdgbmhgebahciahcpkhdofjdlkf',
-  'http://localhost:3000',
-  "https://www.free4talk.com"
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
-
-
-// Health check endpoint
-app.get("/", (_, res) => {
-  res.json({ status: "Helsinki bot is running" });
-});
-
-// Main endpoint - receives messages from polling system
-app.post("/chat", async (req: any, res: any) => {
-  try {
-    const { groupId, newMessage } = req.body;
-
-    // Validate input
-    if (!groupId || !newMessage?.username || !newMessage?.text) {
-      return res.status(400).json({
-        error: "Missing required fields: groupId, newMessage.username, newMessage.text"
-      });
-    }
-
-    // Call Helsinki bot
-    const response = await helsinki(groupId, newMessage.username, newMessage.text);
-
-    // Return response
-    res.json({ response });
-
-  } catch (error) {
-    console.error("Error processing message:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 
 const callAgentLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute in milliseconds
@@ -64,9 +31,8 @@ const callAgentLimiter = rateLimit({
 });
 
 
-app.post("/test-agent", callAgentLimiter, async (req: any, res: any) => {
+app.post("/chat", callAgentLimiter, async (req: Request, res: Response) => {
   const { groupId, newMessage } = req.body;
-
   // Validate input
   if (!groupId || !newMessage?.username || !newMessage?.text) {
     return res.status(400).json({
@@ -83,8 +49,5 @@ app.post("/test-agent", callAgentLimiter, async (req: any, res: any) => {
   return res.json({ response });
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Helsinki bot running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`AI Server running on port ${PORT}`));
